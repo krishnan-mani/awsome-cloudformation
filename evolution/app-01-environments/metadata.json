@@ -1,0 +1,10 @@
+{
+  "name": "app-01-environments",
+  "environments": {
+    "dev": {
+      "region": "ap-south-1",
+      "action": "create",
+      "onFailure": "DO_NOTHING"
+    }
+  }
+}

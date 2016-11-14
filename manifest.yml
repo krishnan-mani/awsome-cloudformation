@@ -6,3 +6,4 @@ templates:
   - public-dns
   - dns-names
   - app-01
+  - app-01-environments

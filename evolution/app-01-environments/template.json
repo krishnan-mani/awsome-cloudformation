@@ -1,0 +1,60 @@
+{
+  "Parameters": {
+    "app": {
+      "Description": "Name of the application (in Elastic Beanstalk)",
+      "Type": "String",
+      "Default": "app-01"
+    },
+    "Environment": {
+      "Description": "(name of) application environment",
+      "Type": "String",
+      "Default": "app-01-dev"
+    }
+  },
+  "Resources": {
+    "environment": {
+      "Type": "AWS::ElasticBeanstalk::Environment",
+      "Properties": {
+        "ApplicationName": {
+          "Ref": "app"
+        },
+        "EnvironmentName": {
+          "Ref": "Environment"
+        },
+        "SolutionStackName": "64bit Amazon Linux 2016.09 v2.2.0 running Ruby 2.3 (Puma)",
+        "OptionSettings": [
+          {
+            "Namespace": "aws:autoscaling:launchconfiguration",
+            "OptionName": "IamInstanceProfile",
+            "Value": {
+              "Fn::ImportValue": "app-01-ebInstanceProfileName"
+            }
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment",
+            "OptionName": "ServiceRole",
+            "Value": {
+              "Fn::ImportValue": "app-01-ebServiceRoleName"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "DnsName": {
+      "Description": "DNS name for the load balancer in the environment",
+      "Value": {
+        "Fn::GetAtt": [
+          "environment",
+          "EndpointURL"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DnsName"
+        }
+      }
+    }
+  }
+}
