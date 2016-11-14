@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "StackName",
+    "ParameterValue": "Jenkins"
+  },
+  {
+    "ParameterKey": "DnsName",
+    "ParameterValue": "jenkins.workshop.devopsanand.com"
+  },
+  {
+    "ParameterKey": "DNSStackName",
+    "ParameterValue": "public-dns-context-workshop-ap-south-1"
+  }
+]

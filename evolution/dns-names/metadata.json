@@ -1,0 +1,11 @@
+{
+  "name": "dns-names",
+  "hasParameters": true,
+  "contexts": {
+    "jenkins": {
+      "region": "ap-south-1",
+      "action": "create",
+      "onFailure": "DO_NOTHING"
+    }
+  }
+}

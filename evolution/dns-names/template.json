@@ -1,0 +1,56 @@
+{
+  "Parameters": {
+    "DnsName": {
+      "Description": "desired domain name",
+      "Type": "String"
+    },
+    "StackName": {
+      "Description": "Name of the stack that is publishing the DNS name to use as CNAME",
+      "Type": "String"
+    },
+    "DNSStackName": {
+      "Description": "Hosted zone Id of the domain",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "appDNSName": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "Name": {
+          "Ref": "DnsName"
+        },
+        "ResourceRecords": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "StackName"
+                  },
+                  "DnsName"
+                ]
+              ]
+            }
+          }
+        ],
+        "Type": "CNAME",
+        "TTL": "60",
+        "HostedZoneId": {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "DNSStackName"
+                },
+                "HostedZoneId"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  }
+}

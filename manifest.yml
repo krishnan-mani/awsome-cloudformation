@@ -4,3 +4,4 @@ templates:
   - jenkins-instance-profile
   - jenkins
   - public-dns
+  - dns-names
