@@ -1,0 +1,29 @@
+{
+  "Parameters": {
+    "RepositoryName": {
+      "Description": "Name of the version control repository",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "repository": {
+      "Type": "AWS::CodeCommit::Repository",
+      "Properties": {
+        "RepositoryName": {
+          "Ref": "RepositoryName"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "RepositoryCloneUrl": {
+      "Description": "(git ssh) clone Url for the version control repository",
+      "Value": {
+        "Fn::GetAtt": [
+          "repository",
+          "CloneUrlSsh"
+        ]
+      }
+    }
+  }
+}

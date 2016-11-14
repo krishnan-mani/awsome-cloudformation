@@ -1,0 +1,10 @@
+{
+  "name": "create-repository",
+  "hasParameters": true,
+  "contexts": {
+    "repo-environments": {
+      "region": "us-east-1",
+      "action": "create"
+    }
+  }
+}
