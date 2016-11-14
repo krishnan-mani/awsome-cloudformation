@@ -1,0 +1,290 @@
+{
+  "Description": "Setup Jenkins",
+  "Parameters": {
+    "Environment": {
+      "Description": "A standard environment name",
+      "Type": "String"
+    },
+    "VpcId": {
+      "Description": "(Id for) VPC that Jenkins will reside in",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "SubnetIds": {
+      "Description": "(list of Ids for) subnets that the load balancer can use",
+      "Type": "CommaDelimitedList"
+    },
+    "jenkinsInstanceProfileId": {
+      "Description": "(Id for) the instance profile Jenkins will use",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "jenkinsInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "yum": {
+                "git": [],
+                "awslogs": []
+              }
+            },
+            "files": {
+              "/etc/awslogs/config/jenkins-cwlogs.conf": {
+                "content": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "[jenkins]",
+                      "file=/var/log/jenkins/jenkins.log",
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "log_group_name",
+                            "=",
+                            {
+                              "Ref": "jenkinsLogGroup"
+                            }
+                          ]
+                        ]
+                      },
+                      "log_stream_name={instance_id}"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "awslogs": {
+                  "enabled": true,
+                  "ensureRunning": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "IamInstanceProfile": {
+          "Ref": "jenkinsInstanceProfileId"
+        },
+        "ImageId": "ami-34b4c05b",
+        "InstanceType": "c4.xlarge",
+        "Monitoring": true,
+        "SecurityGroupIds": [
+          {
+            "Ref": "jenkinsSecurityGroup"
+          }
+        ],
+        "SubnetId": "",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "jenkins"
+          },
+          {
+            "Key": "env",
+            "Value": {
+              "Ref": "Environment"
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/usr/bin/env bash",
+                "yum update -y",
+                "yum install -y patch libyaml-devel glibc-headers autoconf gcc-c++ glibc-devel patch readline-devel zlib-devel libffi-devel openssl-devel automake libtool bison sqlite-devel",
+                "wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo",
+                "rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key",
+                "yum install -y jenkins",
+                "chkconfig --add jenkins",
+                "service jenkins start",
+                {
+                  "Fn::Join": [
+                    " ",
+                    [
+                      "/opt/aws/bin/cfn-init",
+                      "--region",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "-s",
+                      {
+                        "Ref": "AWS::StackId"
+                      },
+                      "-r",
+                      "jenkinsInstance",
+                      "-v"
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "jenkinsLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "RetentionInDays": 7
+      }
+    },
+    "jenkinsLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "CrossZone": true,
+        "HealthCheck": {
+          "HealthyThreshold": 2,
+          "Interval": "30",
+          "Target": "HTTP:8080/login",
+          "Timeout": "5",
+          "UnhealthyThreshold": "3"
+        },
+        "Instances": [
+          {
+            "Ref": "jenkinsInstance"
+          }
+        ],
+        "Listeners": [
+          {
+            "InstancePort": "8080",
+            "InstanceProtocol": "HTTP",
+            "LoadBalancerPort": "80",
+            "Protocol": "HTTP"
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "Ref": "jenkinsLoadBalancerSecurityGroup"
+          }
+        ],
+        "Subnets": {
+          "Ref": "SubnetIds"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "jenkins"
+          },
+          {
+            "Key": "env",
+            "Value": {
+              "Ref": "Environment"
+            }
+          }
+        ]
+      }
+    },
+    "jenkinsLoadBalancerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for the ELB that will direct traffic to Jenkins",
+        "VpcId": {
+          "Ref": "VpcId"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "jenkins-load-balancer"
+          },
+          {
+            "Key": "env",
+            "Value": {
+              "Ref": "Environment"
+            }
+          }
+        ]
+      }
+    },
+    "whitelistUserTrafficToELB": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "GroupId": {
+          "Ref": "jenkinsLoadBalancerSecurityGroup"
+        },
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "whitelistELBToJenkins": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "GroupId": {
+          "Ref": "jenkinsSecurityGroup"
+        },
+        "SourceSecurityGroupId": {
+          "Ref": "jenkinsLoadBalancerSecurityGroup"
+        },
+        "FromPort": "8080",
+        "ToPort": "8080"
+      }
+    },
+    "jenkinsSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Jenkins security group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "jenkins"
+          },
+          {
+            "Key": "env",
+            "Value": {
+              "Ref": "Environment"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "jenkinsURL": {
+      "Description": "URL to Jenkins",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "jenkinsLoadBalancer",
+                "DNSName"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "JenkinsDnsName": {
+      "Description": "DNS name to (the load balancer serving) Jenkins",
+      "Value": {
+        "Fn::GetAtt": [
+          "jenkinsLoadBalancer",
+          "DNSName"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "JenkinsDnsName"
+        }
+      }
+    }
+  }
+}

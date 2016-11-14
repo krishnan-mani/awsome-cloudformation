@@ -1,0 +1,6 @@
+{
+  "name": "jenkins-instance-profile",
+  "hasParameters": true,
+  "region": "ap-south-1",
+  "action": "create"
+}

@@ -1,0 +1,52 @@
+{
+  "Parameters": {
+    "ManagedPolicyArnsList": {
+      "Description": "(list of) ARNs for managed IAM policies to assign",
+      "Type": "CommaDelimitedList"
+    }
+  },
+  "Resources": {
+    "jenkinsInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "jenkinsRole"
+          }
+        ]
+      }
+    },
+    "jenkinsRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": {
+          "Ref": "ManagedPolicyArnsList"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "jenkinsInstanceProfileId": {
+      "Description": "(Id of) instance profile to use with Jenkins",
+      "Value": {
+        "Ref": "jenkinsInstanceProfile"
+      }
+    }
+  }
+}

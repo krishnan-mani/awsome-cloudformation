@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "VPC-ID"
+  },
+  {
+    "ParameterKey": "SubnetIds",
+    "ParameterValue": "SUBNET-IDS"
+  },
+  {
+    "ParameterKey": "jenkinsInstanceProfileId",
+    "ParameterValue": "JENKINS-IP"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "dev"
+  }
+]

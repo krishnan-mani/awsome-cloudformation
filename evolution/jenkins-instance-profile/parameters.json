@@ -1,0 +1,6 @@
+[
+  {
+    "ParameterKey": "ManagedPolicyArnsList",
+    "ParameterValue": " arn:aws:iam::aws:policy/AdministratorAccess"
+  }
+]
