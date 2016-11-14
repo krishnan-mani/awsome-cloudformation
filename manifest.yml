@@ -5,3 +5,4 @@ templates:
   - jenkins
   - public-dns
   - dns-names
+  - app-01
