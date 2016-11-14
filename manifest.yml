@@ -3,3 +3,4 @@ templates:
   - collaborate-on-repositories
   - jenkins-instance-profile
   - jenkins
+  - public-dns

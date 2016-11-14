@@ -1,0 +1,45 @@
+{
+  "Parameters": {
+    "ParentSubDomain": {
+      "Description": "Name of the parent sub domain (such as 'abc.example.com')",
+      "Type": "String"
+    },
+    "SubDomain": {
+      "Description": "Desired sub domain (such as 'foo')",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "myDomainPublicHostedZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": {
+          "Fn::Join": [
+            ".",
+            [
+              {
+                "Ref": "SubDomain"
+              },
+              {
+                "Ref": "ParentSubDomain"
+              }
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "HostedZoneId": {
+      "Description": "Route 53 Hosted Zone Id for the sub domain",
+      "Value": {
+        "Ref": "myDomainPublicHostedZone"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-HostedZoneId"
+        }
+      }
+    }
+  }
+}

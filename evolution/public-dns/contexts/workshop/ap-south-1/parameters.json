@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "ParentSubDomain",
+    "ParameterValue": "devopsanand.com"
+  },
+  {
+    "ParameterKey": "SubDomain",
+    "ParameterValue": "workshop"
+  }
+]
