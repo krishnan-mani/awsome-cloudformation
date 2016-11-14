@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "AdminGroupStackName",
+    "ParameterValue": "create-admin-group-ap-south-1"
+  },
+  {
+    "ParameterKey": "UserName",
+    "ParameterValue": "Veeru"
+  }
+]

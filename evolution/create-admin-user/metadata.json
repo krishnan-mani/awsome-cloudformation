@@ -1,0 +1,6 @@
+{
+  "name": "create-admin-user",
+  "hasParameters": true,
+  "region": "us-east-1",
+  "action": "create"
+}
