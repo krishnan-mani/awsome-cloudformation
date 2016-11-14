@@ -22,8 +22,10 @@ As an administrator,
 I want to generate the access credentials needed to act on the AWS account for the user,
 To ensure authentication and authorization are in place to perform administrative actions.
 
-Templates:
+Scripts:
 * [iam-password-policy]
+
+Templates:
 * [create-admin-user]
 
 ### Story-5
