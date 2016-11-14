@@ -1,0 +1,9 @@
+- We follow some conventions to organise the CloudFormation template files and related artifacts. These are as follows
+  - All artifacts for one kind of CloudFormation stack (such as "collaborate-on-repositories") are located within a single folder
+  - The following files are located within the folder for each stack
+    - template.json: CloudFormation template
+    - metadata.json: Provides certain information about stacks
+    - parameters.json: File with values for Parameters to be supplied when creating a stack
+    - "contexts" folder: When different "instances" of stacks can be created from a single template, we organise them under contexts. For e.g.: each context creates a separate version control repository. 
+    - "environments" folder: When different environments can be created from a single template, we can organise them under environments. For e.g.: different environments such as "dev", "qa", etc.
+  - One or more manifest files (such as "manifest.yml") are located in the root of the repository. These list which stacks we wish to act upon  
